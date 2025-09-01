@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from celery import Celery
 from config import Config
 
 db = SQLAlchemy()
@@ -9,11 +10,14 @@ migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
+
 import os
 
 def create_app():
     app = Flask(__name__, template_folder=os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'templates'))
     app.config.from_object(Config)
+    celery.conf.update(app.config)
 
     db.init_app(app)
     migrate.init_app(app, db)
