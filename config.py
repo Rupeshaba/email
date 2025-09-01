@@ -9,3 +9,5 @@ class Config:
     CELERY_IMPORTS = ('app.email_utils',) # Specify modules containing Celery tasks
     TELEGRAM_BOT_TOKEN = os.environ.get('8309194161:AAHwrChFv2aACvdRIvTfgVyp6Bl00_ewlO4')
     TELEGRAM_CHAT_ID = os.environ.get('1248118664')
+    PORT = os.environ.get('PORT', 5000)
+
