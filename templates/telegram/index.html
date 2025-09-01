@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Telegram Bot Configuration</h5>
+        </div>
+        <div class="card-body">
+            {% if settings %}
+            <p><strong>Bot Token:</strong> <code>{{ settings.bot_token }}</code></p>
+            <p><strong>Chat ID:</strong> <code>{{ settings.chat_id }}</code></p>
+            <p><strong>Alerts Enabled:</strong> 
+                {% if settings.alerts_enabled %}
+                    <span class="badge bg-success">Yes</span>
+                {% else %}
+                    <span class="badge bg-danger">No</span>
+                {% endif %}
+            </p>
+            <div class="d-flex justify-content-start mt-3">
+                <a href="{{ url_for('telegram.configure') }}" class="btn btn-warning me-2">Edit Configuration</a>
+                <form action="{{ url_for('telegram.toggle_alerts') }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-{{ 'danger' if settings.alerts_enabled else 'success' }}">
+                        {{ 'Disable Alerts' if settings.alerts_enabled else 'Enable Alerts' }}
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <p>Telegram bot is not configured yet.</p>
+            <a href="{{ url_for('telegram.configure') }}" class="btn btn-primary">Configure Telegram Bot</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if settings %}
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-info text-white">
+            <h5>Alert Preferences</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('telegram.update_alert_preferences') }}" method="POST">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="alert_login_success" id="alert_login_success" {% if settings.alert_login_success %}checked{% endif %}>
+                    <label class="form-check-label" for="alert_login_success">
+                        Login Success Alerts
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="alert_login_failure" id="alert_login_failure" {% if settings.alert_login_failure %}checked{% endif %}>
+                    <label class="form-check-label" for="alert_login_failure">
+                        Login Failure Alerts
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="alert_sending_started" id="alert_sending_started" {% if settings.alert_sending_started %}checked{% endif %}>
+                    <label class="form-check-label" for="alert_sending_started">
+                        Sending Started Alerts
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="alert_sending_paused_resumed_stopped" id="alert_sending_paused_resumed_stopped" {% if settings.alert_sending_paused_resumed_stopped %}checked{% endif %}>
+                    <label class="form-check-label" for="alert_sending_paused_resumed_stopped">
+                        Sending Paused/Resumed/Stopped Alerts
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="alert_batch_sent" id="alert_batch_sent" {% if settings.alert_batch_sent %}checked{% endif %}>
+                    <label class="form-check-label" for="alert_batch_sent">
+                        Each Batch of Messages Sent Alerts
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="alert_errors" id="alert_errors" {% if settings.alert_errors %}checked{% endif %}>
+                    <label class="form-check-label" for="alert_errors">
+                        Error Alerts
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Update Preferences</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

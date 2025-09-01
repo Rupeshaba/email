@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="row">
+        <!-- Overall Stats -->
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sent</h5>
+                    <p class="card-text fs-3">{{ total_sent }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-danger shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Failed</h5>
+                    <p class="card-text fs-3">{{ total_failed }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Pending</h5>
+                    <p class="card-text fs-3">{{ total_pending }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Sender Stats -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5>Sender Email Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Sent Count</th>
+                                <th>Sending Limit</th>
+                                <th>Remaining</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sender in sender_stats %}
+                            <tr>
+                                <td>{{ sender.email }}</td>
+                                <td>{{ sender.sent_count }}</td>
+                                <td>{{ sender.sending_limit }}</td>
+                                <td>{{ sender.sending_limit - sender.sent_count }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4">No sender emails configured.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campaign Stats -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5>Campaign Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Campaign Name</th>
+                                <th>Status</th>
+                                <th>Total Emails</th>
+                                <th>Sent</th>
+                                <th>Failed</th>
+                                <th>Pending</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for campaign in campaign_stats %}
+                            <tr>
+                                <td>{{ campaign.name }}</td>
+                                <td><span class="badge bg-{{ {'running':'success', 'paused':'warning', 'stopped':'secondary', 'draft':'info', 'completed':'primary'}[campaign.status] }}">{{ campaign.status.capitalize() }}</span></td>
+                                <td>{{ campaign.total_emails }}</td>
+                                <td>{{ campaign.emails_sent }}</td>
+                                <td>{{ campaign.emails_failed }}</td>
+                                <td>{{ campaign.total_emails - campaign.emails_sent - campaign.emails_failed }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6">No campaigns created yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-dark text-white">
+            <h5>Recent Logs</h5>
+        </div>
+        <div class="card-body">
+            <form class="row g-3 mb-4" method="GET" action="{{ url_for('dashboard.dashboard') }}">
+                <div class="col-md-3">
+                    <label for="filterStatus" class="form-label">Status</label>
+                    <select class="form-select" id="filterStatus" name="status">
+                        <option value="all" {% if filter_status == 'all' %}selected{% endif %}>All</option>
+                        <option value="success" {% if filter_status == 'success' %}selected{% endif %}>Success</option>
+                        <option value="failure" {% if filter_status == 'failure' %}selected{% endif %}>Failure</option>
+                        <option value="started" {% if filter_status == 'started' %}selected{% endif %}>Started</option>
+                        <option value="paused" {% if filter_status == 'paused' %}selected{% endif %}>Paused</option>
+                        <option value="resumed" {% if filter_status == 'resumed' %}selected{% endif %}>Resumed</option>
+                        <option value="stopped" {% if filter_status == 'stopped' %}selected{% endif %}>Stopped</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filterSender" class="form-label">Sender Email</label>
+                    <input type="text" class="form-control" id="filterSender" name="sender" value="{{ filter_sender or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="filterReceiver" class="form-label">Receiver Email</label>
+                    <input type="text" class="form-control" id="filterReceiver" name="receiver" value="{{ filter_receiver or '' }}">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+
+            <table class="table table-striped table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Level</th>
+                        <th>Message</th>
+                        <th>Sender</th>
+                        <th>Receiver</th>
+                        <th>Status</th>
+                        <th>Error Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td><span class="badge bg-{{ {'INFO':'info', 'WARNING':'warning', 'ERROR':'danger'}[log.level] }}">{{ log.level }}</span></td>
+                        <td>{{ log.message }}</td>
+                        <td>{{ log.sender_email or 'N/A' }}</td>
+                        <td>{{ log.receiver_email or 'N/A' }}</td>
+                        <td><span class="badge bg-{{ {'success':'success', 'failure':'danger', 'started':'primary', 'paused':'warning', 'resumed':'info', 'stopped':'secondary'}[log.status] if log.status else 'secondary' }}">{{ log.status or 'N/A' }}</span></td>
+                        <td>{{ log.error_reason or 'N/A' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">No logs found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="text-end mt-3">
+                <a href="{{ url_for('dashboard.export_logs') }}" class="btn btn-outline-primary me-2">Export All Logs to CSV</a>
+                <form action="{{ url_for('dashboard.clear_logs') }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to clear all logs? This action cannot be undone.');">Clear All Logs</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

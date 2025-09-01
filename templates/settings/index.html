@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5>Application Settings</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <a href="{{ url_for('settings.change_password') }}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-key me-2"></i> Change Admin Password
+                </a>
+                <!-- Add other settings here if needed -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

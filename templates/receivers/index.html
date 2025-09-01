@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Create New Campaign</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('receivers.create_campaign') }}" method="POST" class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <label for="campaign_name" class="visually-hidden">Campaign Name</label>
+                    <input type="text" class="form-control" id="campaign_name" name="campaign_name" placeholder="Enter new campaign name" required>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success w-100">Create Campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5>Existing Campaigns</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Campaign Name</th>
+                        <th>Status</th>
+                        <th>Total Emails</th>
+                        <th>Sent</th>
+                        <th>Failed</th>
+                        <th>Pending</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campaign in campaigns %}
+                    <tr>
+                        <td>{{ campaign.name }}</td>
+                        <td><span class="badge bg-{{ {'running':'success', 'paused':'warning', 'stopped':'secondary', 'draft':'info', 'completed':'primary'}[campaign.status] }}">{{ campaign.status.capitalize() }}</span></td>
+                        <td>{{ campaign.total_emails }}</td>
+                        <td>{{ campaign.emails_sent }}</td>
+                        <td>{{ campaign.emails_failed }}</td>
+                        <td>{{ campaign.total_emails - campaign.emails_sent - campaign.emails_failed }}</td>
+                        <td>
+                            <a href="{{ url_for('receivers.manage', campaign_id=campaign.id) }}" class="btn btn-sm btn-primary me-2">Manage Receivers</a>
+                            <!-- Add delete campaign functionality if needed -->
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">No campaigns created yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

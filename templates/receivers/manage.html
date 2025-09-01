@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="row">
+        <!-- Campaign Stats -->
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Emails</h5>
+                    <p class="card-text fs-3">{{ total_emails }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Sent Emails</h5>
+                    <p class="card-text fs-3">{{ sent_emails }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Emails</h5>
+                    <p class="card-text fs-3">{{ pending_emails }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Add Receiver Emails to Campaign: {{ campaign.name }}</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="emails_textarea" class="form-label">Paste Emails (one per line)</label>
+                    <textarea class="form-control" id="emails_textarea" name="emails_textarea" rows="5"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="file_upload" class="form-label">Or Upload File (.txt or .csv)</label>
+                    <input class="form-control" type="file" id="file_upload" name="file" accept=".txt,.csv">
+                </div>
+                <button type="submit" class="btn btn-primary">Add Emails</button>
+                <a href="{{ url_for('receivers.index') }}" class="btn btn-secondary">Back to Campaigns</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-info text-white">
+            <h5>Receiver List for Campaign: {{ campaign.name }}</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Email Address</th>
+                        <th>Status</th>
+                        <th>Sent At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receiver in campaign.receivers.all() %}
+                    <tr>
+                        <td>
+                            <span id="email-display-{{ receiver.id }}">{{ receiver.email }}</span>
+                            <form action="{{ url_for('receivers.edit_receiver', receiver_id=receiver.id) }}" method="POST" class="d-inline-flex align-items-center" id="edit-form-{{ receiver.id }}" style="display: none;">
+                                <input type="email" name="email" value="{{ receiver.email }}" class="form-control form-control-sm me-2" required>
+                                <button type="submit" class="btn btn-sm btn-success me-1">Save</button>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="toggleEdit({{ receiver.id }})">Cancel</button>
+                            </form>
+                        </td>
+                        <td><span class="badge bg-{{ {'pending':'warning', 'sent':'success', 'failed':'danger'}[receiver.status] }}">{{ receiver.status.capitalize() }}</span></td>
+                        <td>{{ receiver.sent_at.strftime('%Y-%m-%d %H:%M:%S') if receiver.sent_at else 'N/A' }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-warning me-2" onclick="toggleEdit({{ receiver.id }})">Edit</button>
+                            <form action="{{ url_for('receivers.delete_receiver', receiver_id=receiver.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this receiver email?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No receiver emails added to this campaign yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleEdit(receiverId) {
+        const displaySpan = document.getElementById(`email-display-${receiverId}`);
+        const editForm = document.getElementById(`edit-form-${receiverId}`);
+        
+        if (displaySpan.style.display === 'none') {
+            displaySpan.style.display = 'inline';
+            editForm.style.display = 'none';
+        } else {
+            displaySpan.style.display = 'none';
+            editForm.style.display = 'inline-flex';
+        }
+    }
+</script>
+{% endblock %}

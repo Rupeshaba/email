@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5>{{ 'Add New' if not template else 'Edit' }} Message Template</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Template Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ template.name if template else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Subject</label>
+                    <input type="text" class="form-control" id="subject" name="subject" value="{{ template.subject if template else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="body_html" class="form-label">HTML Body (supports placeholders like {name})</label>
+                    <textarea class="form-control" id="body_html" name="body_html" rows="10" required>{{ template.body_html if template else '' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="body_plain" class="form-label">Plain Text Body (optional, for email clients that don't support HTML)</label>
+                    <textarea class="form-control" id="body_plain" name="body_plain" rows="5">{{ template.body_plain if template else '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">{{ 'Add Template' if not template else 'Update Template' }}</button>
+                <a href="{{ url_for('templates.index') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

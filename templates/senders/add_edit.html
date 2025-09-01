@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5>{{ 'Add New' if not sender else 'Edit' }} Sender Email</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ sender.email if sender else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password {% if sender %}(Leave blank to keep current password){% endif %}</label>
+                    <input type="password" class="form-control" id="password" name="password" {% if not sender %}required{% endif %}>
+                </div>
+                <div class="mb-3">
+                    <label for="sending_limit" class="form-label">Sending Limit (per day/campaign, customizable)</label>
+                    <input type="number" class="form-control" id="sending_limit" name="sending_limit" value="{{ sender.sending_limit if sender else 500 }}" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary">{{ 'Add Sender' if not sender else 'Update Sender' }}</button>
+                <a href="{{ url_for('senders.index') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
