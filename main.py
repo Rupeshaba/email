@@ -17,4 +17,5 @@ if __name__ == '__main__':
     # For production, use a WSGI server like Gunicorn.
     # For Celery worker, run 'celery -A main.celery worker --loglevel=info'
     # For Celery beat, run 'celery -A main.celery beat --loglevel=info'
-    app.run(debug=True)
+    port = app.config.get('PORT', 5000)
+    app.run(debug=True, host='0.0.0.0', port=port)
